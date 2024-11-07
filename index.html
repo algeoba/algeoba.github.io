@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="https://www.w3schools.com/lib/w3.js"></script>
+
+  <style>
+    :root {
+      --faded:
+    }
+
+    input[type="range"] {
+      accent-color: #3f51b5;
+      width: 90%
+    }
+
+    .faded {
+      background-image: var(--faded);
+    }
+
+    table {
+      width: 100%
+    }
+  </style>
+</head>
+
+<body class="w3-auto" onunload="localStorage.agb_poems = JSON.stringify(settings)">
+  <main id="main" class="w3-container w3-text-indigo">
+
+    <nav id="nav" class="w3-top w3-white w3-padding-16">
+
+    </nav>
+
+    <section class="w3-padding-top-32 w3-large" id="textSection"></section>
+
+    <footer class="w3-padding-top-24 w3-center">
+      <p>Чтобы загрузить новый документ, скопируйте нужный текст в буфер обмена, нажмите кнопку ниже и перезагрузите
+        страницу.</p>
+      <p><input type="button" value="загрузить новый документ" id="loadNewDocument" class="w3-button w3-indigo w3-hover-purple">
+      </p>
+      <p id="readinessMessage"></p>
+      <hr />
+      <table>
+        <tbody>
+          <tr>
+            <td>количество шагов затенения</td>
+            <td><input class="w3-input w3-center w3-text-indigo" id="fadingSteps" type="number" min="3" max="9" value="7" step="1">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><input class="" type="range" id="" min="0" max="7" step="1" value="1" onchange="adjust(this.value)">
+            </td>
+          </tr>
+          <tr>
+            <td>количество милисекунд показа строки</td>
+            <td><input class="w3-center w3-text-indigo" id="delaySteps" type="number" min="500" max="4500" value="1500" step="500">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <input type="button" value="test1" onclick="alert(JSON.stringify(settings))">
+      <input type="button" value="test2" onclick="alert(localStorage.getItem('agb_poems'))">
+      <input type="button" value="test3" onclick="alert(settings.textArray)">
+    </footer>
+
+  </main>
+</body>
+
+<script>
+  let settings;
+
+  (localStorage.getItem("agb_poems") === null) ? 
+    settings = {delay: "1500", fadingSteps: "7", textArray: ["У лукоморья дуб зелёный;","Златая цепь на дубе том:","И днём и ночью кот учёный","Всё ходит по цепи кругом;"]} 
+    : settings = JSON.parse(localStorage.getItem("agb_poems"));
+
+  //let maxValue = 7; 
+  
+  //let delay = 1500;
+  let opacMin = ",rgba(63,81,181,0)"
+  let opacMax = ",rgba(63,81,181,1)";
+
+  function adjust(value) {
+    let intValue = parseInt(value);
+    document.querySelector(':root').style.setProperty('--faded', `linear-gradient(to right${opacMin.repeat(intValue)}${opacMax.repeat(parseInt(settings.fadingSteps) - intValue)})`)
+  }
+
+  function togglePara(id){
+    w3.toggleClass('#' + id,'faded');
+    setTimeout(function() {w3.toggleClass('#' + id,'faded')}, settings.delay)
+  }
+
+  loadNewDocument.addEventListener("click", () => {
+    nav.innerHTML = "";
+    textSection.innerHTML = "";
+    try {
+      navigator.clipboard.readText().then(clipText => {
+      settings.textArray = clipText.split(/[\r\n]+/)
+      //localStorage.setItem("agb_poems", clipText); 
+      readinessMessage.innerText = "Данные скопированы. Перезагрузите страницу"})
+    } catch(e) {
+      readinessMessage.innerText = "e.message"
+    }
+    
+  });
+
+  function loadText() {
+    //let textArr = localStorage.getItem("agb_poems").split(/[\r\n]+/);
+    let rawHTML = ``;
+    for (let i = 0; i < settings.textArray.length; i++) 
+     rawHTML += 
+        `<p id="p${i}" class="faded w3-text-indigo w3-padding" onclick="togglePara(this.id)">${settings.textArray[i]}</p>`;
+    textSection.innerHTML = rawHTML;
+    nav.innerHTML = 
+      `<input class="" type="range" id="fade" min="0" max="7" step="1" value="1" onchange="adjust(this.value)">`;
+    fade.max = settings.fadingSteps;
+    adjust(1)
+  }  
+/*
+  window.addEventListener("unload", () => {
+    console.log(new Date().toLocaleTimeString());
+    localStorage.setItem("agb_poems",JSON.stringify(settings))
+  })
+*/
+  loadText();
+
+</script>
+
+</html>
